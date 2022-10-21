@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app:cached
+    environment:
+      PYTHONWARNINGS: default
+      PYTHONBREAKPOINT: ipdb.set_trace
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:15.0-alpine
+    user: postgres
+    environment:
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD=app
+      - POSTGRES_DB=app
+    volumes:
+      # with named volume we will persist database state E.g after restarting docker/machine
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
